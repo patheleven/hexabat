@@ -14,4 +14,8 @@ Gem::Specification.new do |gem|
   gem.name          = "hexabat"
   gem.require_paths = ["lib"]
   gem.version       = Hexabat::VERSION
+
+  gem.add_development_dependency 'cucumber'
+  gem.add_development_dependency 'rake'
+  gem.add_development_dependency 'rspec'
 end
