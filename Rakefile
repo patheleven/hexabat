@@ -14,3 +14,5 @@ namespace :cucumber do
 
   Cucumber::Rake::Task.new(:all, 'Run all features')
 end
+
+task cucumber: 'cucumber:ok'
