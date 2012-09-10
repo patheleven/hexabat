@@ -7,10 +7,12 @@ describe Hexabat::IssuePageImporter do
       page: 1,
       state: 'open',
       assignee: '*',
-      issue_retrieved: issue_retrieved
+      issue_retrieved: issue_retrieved,
+      issue_count_known: issue_count_known
     )
   end
-  let(:issue_retrieved) { lambda{|issue|} }
+  let(:issue_retrieved)   { lambda{|issue|} }
+  let(:issue_count_known) { lambda{|issue_count|} }
   let(:endpoint)        { 'https://api.github.com/repos/path11/hexabat/issues' }
 
   it 'can build an importer and start the import' do

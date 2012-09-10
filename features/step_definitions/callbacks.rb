@@ -4,7 +4,7 @@ Given /^I set up an issue retrieved callback$/ do
 end
 
 When /^I import the "(.*?)" repository$/ do |repository|
-  @hexabat = Hexabat::Client.new(repository)
+  @hexabat = Hexabat::Client.new(Hexabat::Importer.new(repository))
   @hexabat.on issue_retrieved: @issue_retrieved
   @hexabat.import
 end

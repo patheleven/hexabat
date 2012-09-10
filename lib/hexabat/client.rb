@@ -1,19 +1,14 @@
-$LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), '..'))
-
 require 'eventmachine'
-require 'hexabat/importer'
 
 module Hexabat
   class Client
-    attr_reader :repository, :callbacks
+    attr_reader :callbacks
 
-    def initialize(repository)
-      @repository = repository
+    def initialize(importer)
+      @importer = importer
       @callbacks = {
         issue_retrieved:   ->(issue){},
-        #issue_count_known: ->(issue_count){},
-        #page_retrieved:    ->(page, issue_count){},
-        #page_count_known:  ->(page_count){}
+        issue_count_known: ->(issue_count){}
       }
     end
 
@@ -38,7 +33,7 @@ module Hexabat
     private
 
     def start_importing
-      Importer.new(repository, callbacks).import
+      @importer.import(callbacks)
     end
 
     def known? event

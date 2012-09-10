@@ -10,9 +10,10 @@ module Hexabat
     end
 
     def initialize(params)
-      @repository      = params.delete :repository
-      @issue_retrieved = params.delete(:issue_retrieved)
-      @query           = params.merge(per_page: MAX_PAGE_SIZE)
+      @repository        = params.delete :repository
+      @issue_retrieved   = params.delete(:issue_retrieved)
+      @issue_count_known = params.delete(:issue_count_known)
+      @query             = params.merge(per_page: MAX_PAGE_SIZE)
     end
 
     def import

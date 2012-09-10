@@ -1,7 +1,7 @@
 require 'hexabat/importer'
 
 describe Hexabat::Importer do
-  subject          { described_class.new repository, callbacks }
+  subject          { described_class.new repository }
   let(:repository) { 'path11/crafterapp' }
   let(:callbacks)  { {issue_retrieved: callback} }
   let(:callback)   { lambda{} }
@@ -16,9 +16,10 @@ describe Hexabat::Importer do
       page: 1,
       per_page: 100,
       state: 'open',
-      issue_retrieved: callback
+      issue_retrieved: callback,
+      issue_count_known: callback
     )
-    subject.import
+    subject.import issue_retrieved: callback, issue_count_known: callback
   end
 end
 
