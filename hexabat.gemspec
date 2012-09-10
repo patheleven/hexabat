@@ -15,7 +15,12 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Hexabat::VERSION
 
+  gem.add_runtime_dependency     'eventmachine', '~> 1.0.0'
+  gem.add_runtime_dependency     'em-http-request'
+  gem.add_runtime_dependency     'yajl-ruby'
+
   gem.add_development_dependency 'cucumber'
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec'
+  gem.add_development_dependency 'webmock'
 end

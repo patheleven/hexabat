@@ -1,4 +1,5 @@
 Given /^I set up an issue retrieved callback$/ do
+  @retrieved_issues = []
   @issue_retrieved = ->(issue) { @retrieved_issues << issue }
 end
 
@@ -9,5 +10,6 @@ When /^I import the "(.*?)" repository$/ do |repository|
 end
 
 Then /^the callback is called with every issue in that repository$/ do
-  fail 'fake the requests and return a few pages of open and closed issues!!'
+  @retrieved_issues.count.should be 1
+  #fail 'fake the requests and return a few pages of open and closed issues!!'
 end
