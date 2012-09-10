@@ -2,7 +2,8 @@ $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', '..', 'lib')
 
 require 'hexabat'
 require 'webmock/cucumber'
-include WebMock::API
+
+World(WebMock::API)
 
 ISSUES = %q{
 [
@@ -64,6 +65,3 @@ ISSUES = %q{
   }
 ]
 }
-
-stub_request(:get, "https://api.github.com/repos/path11/hexabat/issues?page=1&per_page=100&state=open").
-          to_return(:status => 200, :body => ISSUES, :headers => {})
