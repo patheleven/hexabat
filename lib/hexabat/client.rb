@@ -51,8 +51,8 @@ module Hexabat
 end
 
 __END__
-
 Hexabat::Client.new(Hexabat::Importer.new('rails/rails')).tap do |hexabat|
   hexabat.on issue_retrieved: ->(issue){ STDERR.puts issue['number'] }
+  hexabat.on issue_count_known: ->(count){ STDERR.puts "COUNT: #{count}" }
   hexabat.import
 end

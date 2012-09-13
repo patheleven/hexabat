@@ -10,12 +10,21 @@ module Hexabat
     end
 
    def import(callbacks)
-     FirstPagesImporter.new(
-       PageRequestCreator.new(@repository, &callbacks[:issue_retrieved]),
-       &callbacks[:issue_count_known]
-     ).import
+     first_page_importer(callbacks).import
    end
 
+   private
+
+   def first_page_importer(callbacks)
+    FirstPagesImporter.new(
+       page_request_creator(callbacks),
+       &callbacks[:issue_count_known]
+     )
+   end
+
+   def page_request_creator(callbacks)
+     PageRequestCreator.new(@repository, &callbacks[:issue_retrieved])
+   end
   end
 end
 

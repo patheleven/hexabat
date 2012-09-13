@@ -1,23 +1,34 @@
 require 'em-http-request'
+require_relative 'dual_page_request'
+
 
 module Hexabat
   class FirstPagesImporter
     def initialize(page_request_creator, &issue_count_known)
       @page_request_creator = page_request_creator
       @issue_count_known    = issue_count_known
+      @count = 0
     end
 
     def import
-      multi_request = EM::MultiRequest.new
-      multi_request.add :open,   page_request(page: 1, state: 'open')
-      multi_request.add :closed, page_request(page: 1, state: 'closed')
-      multi_request.callback &method(:first_pages_retrieved)
-      multi_request.errback  &method(:error_occurred)
+      DualPageRequest.new(@page_request_creator, &method(:first_pages_retrieved)).get(1,1)
     end
 
     def first_pages_retrieved(http)
       open_page_range   = IssuesPager.page_range_from http.responses[:callback][:open].response_header
       closed_page_range = IssuesPager.page_range_from http.responses[:callback][:closed].response_header
+
+      @count = (open_page_range.last + closed_page_range.last - 2) * 100
+      puts "all but last pages: #{@count}"
+      puts open_page_range
+      puts closed_page_range
+      DualPageRequest.new(@page_request_creator, &method(:last_pages_retrieved)).get(open_page_range.last, closed_page_range.last)
+    end
+
+    def last_pages_retrieved(http)
+      open_issues   = Yajl::Parser.parse(http.responses[:callback][:open].response)
+      closed_issues = Yajl::Parser.parse(http.responses[:callback][:closed].response)
+      @issue_count_known.call (@count + open_issues.count + closed_issues.count)
     end
 
     def error_occurred http
