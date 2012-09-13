@@ -1,19 +1,25 @@
 require 'hexabat/importer'
 
 describe Hexabat::Importer do
-  subject            { described_class.new repository, page_request }
-  let(:repository)   { 'path11/hexabat' }
-  let(:page_request) { stub :page_request }
-  let(:callback)     { lambda{} }
+  subject                    { described_class.new repository }
+  let(:repository)           { 'path11/hexabat' }
+  let(:page_request_creator) { stub(:page_request_creator) }
+  let(:first_page_importer)  { stub(:first_page_importer) }
 
   it 'knows what repository to import' do
     subject.repository.should eq 'path11/hexabat'
   end
 
   it 'imports the first page of open issues' do
-    page_request.should_receive(:for).
-      with(repository, page: 1, state: 'open', &callback)
-    subject.import issue_retrieved: callback, issue_count_known: callback
+    issue_retrieved, issue_count_known = lambda{}, lambda{}
+    Hexabat::PageRequestCreator.stub(:new).
+      with(repository, &issue_retrieved).
+      and_return(page_request_creator)
+    Hexabat::FirstPagesImporter.stub(:new).
+      with(page_request_creator, &issue_count_known).
+      and_return(first_page_importer)
+    first_page_importer.should_receive(:import)
+    subject.import issue_retrieved: issue_retrieved, issue_count_known: issue_count_known
   end
 end
 

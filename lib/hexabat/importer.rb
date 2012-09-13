@@ -1,16 +1,19 @@
-require 'hexabat/page_request'
+require 'hexabat/page_request_creator'
+require 'hexabat/first_pages_importer'
 
 module Hexabat
   class Importer
     attr_reader :repository
 
-    def initialize(repository, page_request = PageRequest)
+    def initialize(repository)
       @repository = repository
-      @page_request = page_request
     end
 
-   def import callbacks
-     @page_request.for(@repository, page: 1, state: 'open', &callbacks[:issue_retrieved])
+   def import(callbacks)
+     FirstPagesImporter.new(
+       PageRequestCreator.new(@repository, &callbacks[:issue_retrieved]),
+       &callbacks[:issue_count_known]
+     ).import
    end
 
   end

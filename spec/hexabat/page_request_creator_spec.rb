@@ -1,6 +1,7 @@
-require 'hexabat/page_request'
+require 'hexabat/page_request_creator'
 
-describe Hexabat::PageRequest do
+describe Hexabat::PageRequestCreator do
+  subject          { described_class.new repository, &callback }
   let(:repository) { 'path11/hexabat' }
   let(:query)      { Hash[page: 1, state: 'open'] }
   let(:callback)   { lambda{} }
@@ -16,17 +17,17 @@ describe Hexabat::PageRequest do
 
   it 'builds an EM::HttpRequest to retrieve the page' do
     get.should_receive(:errback)
-    described_class.for(repository, query, &callback).should eq get
+    subject.for(query).should eq get
   end
 
   it 'setups the callback for the request' do
     get.should_receive(:callback)
-    described_class.for(repository, query, &callback)
+    subject.for(query)
   end
 
   it 'setups the errback for the request' do
     get.should_receive(:errback)
-    described_class.for(repository, query, &callback)
+    subject.for(query)
   end
 
   it 'yields every issue in the page to the callback' do
@@ -34,7 +35,7 @@ describe Hexabat::PageRequest do
     Yajl::Parser.stub(:parse).with(:json).and_return([:issue1, :issue2])
     callback.should_receive(:call).with(:issue1)
     callback.should_receive(:call).with(:issue2)
-    described_class.page_retrieved(callback).call(http)
+    subject.page_retrieved.call(http)
   end
 
 end
