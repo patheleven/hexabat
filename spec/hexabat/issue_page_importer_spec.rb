@@ -1,19 +1,31 @@
 require 'hexabat/issue_page_importer'
 
+describe Hexabat::PageRequest do
+  let(:repository) { 'path11/hexabat' }
+  let(:query)      { Hash[page: 1, state: 'open'] }
+  let(:endpoint)   { 'https://api.github.com/repos/path11/hexabat/issues' }
+
+  it 'builds an EM::HttpRequest to retrieve the page' do
+    http, get = stub(:http), mock(:get)
+    EM::HttpRequest.stub(:new).with(endpoint).and_return(http)
+    http.stub(:get).
+      with(query: {page: 1, per_page: 100, state: 'open'}).and_return(get)
+    described_class.for(repository, query).should eq get
+  end
+end
+
 describe Hexabat::IssuePageImporter do
   subject do
     described_class.new(
       repository: 'path11/hexabat',
       page: 1,
       state: 'open',
-      assignee: '*',
       issue_retrieved: issue_retrieved,
       issue_count_known: issue_count_known
     )
   end
   let(:issue_retrieved)   { lambda{|issue|} }
   let(:issue_count_known) { lambda{|issue_count|} }
-  let(:endpoint)        { 'https://api.github.com/repos/path11/hexabat/issues' }
 
   it 'can build an importer and start the import' do
     params = { repository: 'rails/rails', page: 1 }
@@ -23,18 +35,12 @@ describe Hexabat::IssuePageImporter do
     described_class.import(params)
   end
 
-  it 'knows the endpoint to query' do
-    subject.endpoint.should eq endpoint
-  end
-
   it 'issues the request that imports the page' do
-    http, get = stub(:http), mock(:get)
-    EM::HttpRequest.stub(:new).with(endpoint).and_return(http)
-    http.stub(:get).
-      with(query: {page: 1, per_page: 100, state: 'open', assignee: '*'}).
-      and_return(get)
-    get.should_receive(:callback)
-    get.should_receive(:errback)
+    request = stub(:request)
+    Hexabat::PageRequest.stub(:for).
+      with('path11/hexabat', page: 1, state: 'open').and_return(request)
+    request.should_receive(:callback)
+    request.should_receive(:errback)
     subject.import
   end
 
