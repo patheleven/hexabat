@@ -3,7 +3,6 @@ require 'hexabat/page_request_creator'
 describe Hexabat::PageRequestCreator do
   subject          { described_class.new repository, &callback }
   let(:repository) { 'path11/hexabat' }
-  let(:query)      { Hash[page: 1, state: 'open'] }
   let(:callback)   { lambda{} }
 
   let(:http)     { stub(:http, response: :json) }
@@ -16,18 +15,17 @@ describe Hexabat::PageRequestCreator do
   end
 
   it 'builds an EM::HttpRequest to retrieve the page' do
-    get.should_receive(:errback)
-    subject.for(query).should eq get
+    subject.for(page: 1, state: 'open').should eq get
   end
 
   it 'setups the callback for the request' do
     get.should_receive(:callback)
-    subject.for(query)
+    subject.for(page: 1, state: 'open')
   end
 
   it 'setups the errback for the request' do
     get.should_receive(:errback)
-    subject.for(query)
+    subject.for(page: 1, state: 'open')
   end
 
   it 'yields every issue in the page to the callback' do
@@ -37,5 +35,4 @@ describe Hexabat::PageRequestCreator do
     callback.should_receive(:call).with(:issue2)
     subject.page_retrieved.call(http)
   end
-
 end
