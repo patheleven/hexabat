@@ -1,3 +1,14 @@
+#make the importer stop EventMachine
+module Hexabat
+  class Importer
+    alias :old_import :import
+    def import callbacks
+      old_import callbacks
+      EM.add_timer(0){ EM.stop }
+    end
+  end
+end
+
 Given /^there is a single open issue on "(.*?)"$/ do |repository|
   stub_request(:get, "https://api.github.com/repos/#{repository}/issues?page=1&per_page=100&state=open").
     to_return(:status => 200, :body => SINGLE_OPEN_ISSUE, :headers => {})

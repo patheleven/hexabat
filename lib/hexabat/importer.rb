@@ -1,18 +1,17 @@
-require 'hexabat/issue_page_importer'
+require 'hexabat/page_request'
 
 module Hexabat
   class Importer
     attr_reader :repository
 
-    def initialize(repository)
+    def initialize(repository, page_request = PageRequest)
       @repository = repository
+      @page_request = page_request
     end
 
    def import callbacks
-      query = { repository: @repository, page: 1, per_page: 100, state: 'open' }
-      query.merge! callbacks
-      IssuePageImporter.import query
-    end
+     @page_request.for(@repository, page: 1, state: 'open', &callbacks[:issue_retrieved])
+   end
 
   end
 end
