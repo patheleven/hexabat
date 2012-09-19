@@ -1,98 +1,36 @@
 require 'hexabat/importer'
 
 describe Hexabat::Importer do
-  subject                    { described_class.new repository }
-  let(:repository)           { 'path11/hexabat' }
-  let(:page_request_creator) { stub(:page_request_creator) }
-  let(:first_page_importer)  { stub(:first_page_importer) }
+  subject               { described_class.new counter, request_creator }
+  let(:counter)         { stub :issue_counter }
+  let(:request_creator) { stub :page_request_creator }
 
-  it 'knows what repository to import' do
-    subject.repository.should eq 'path11/hexabat'
-  end
-
-  it 'imports the first page of open issues' do
-    issue_retrieved, issue_count_known = lambda{}, lambda{}
-    Hexabat::PageRequestCreator.stub(:new).
-      with(repository, &issue_retrieved).
-      and_return(page_request_creator)
-    Hexabat::FirstPagesImporter.stub(:new).
-      with(page_request_creator, &issue_count_known).
-      and_return(first_page_importer)
-    first_page_importer.should_receive(:import)
-    subject.import issue_retrieved: issue_retrieved, issue_count_known: issue_count_known
-  end
-end
-
-__END__
-
-
-require 'crafter/gateway/github/importer'
-
-describe Crafter::Gateway::Github::Importer do
-  subject { described_class.new(repository, synchronizer, callbacks) }
-  let(:repository)      { 'rails/rails' }
-  let(:synchronizer)    { mock(:synchronizer, total_pages: 0) }
-  let(:callbacks) do
-    { page_retrieved: page_retrieved, issue_retrieved: issue_retrieved }
-  end
-  let(:page_retrieved)  { lambda{|page, issue_count|} }
-  let(:issue_retrieved) { lambda{|issue|} }
+  let(:issue_count)     { stub :issue_count }
 
   it 'imports the first page of open and closed issues' do
-    callback = lambda{}
-    subject.stub(:first_page_retrieved).and_return(callback)
-    Crafter::Gateway::Github::IssuePageImporter.should_receive(:import).with(
-      repository: 'rails/rails',
-      page: 1,
-      state: 'open',
-      page_retrieved: callback,
-      issue_retrieved: issue_retrieved
-    )
-    Crafter::Gateway::Github::IssuePageImporter.should_receive(:import).with(
-      repository: 'rails/rails',
-      page: 1,
-      state: 'closed',
-      page_retrieved: callback,
-      issue_retrieved: issue_retrieved
-    )
+    request_creator.should_receive(:for).with(page: 1, state: 'open')
+    request_creator.should_receive(:for).with(page: 1, state: 'closed')
     subject.import
   end
 
-  it 'imports the remaining pages when the first page is imported' do
-    http = stub(:http, response_header: :headers, response: :body)
-    query = { page: 1, state: 'closed' }
-    wrapped_page_callback = lambda {}
-    subject.stub(:page_retrieved).and_return(wrapped_page_callback)
-    wrapped_page_callback.should_receive(:call)
-    Crafter::Gateway::Github::IssuesPager.stub(:page_range_from).
-      with(:headers).and_return(2..2)
-    synchronizer.should_receive(:pages_of_issues_in_state).with(closed: 2)
-    Crafter::Gateway::Github::IssuePageImporter.should_receive(:import).with(
-        repository: 'rails/rails',
-        page: 2,
-        state: 'closed',
-        page_retrieved: wrapped_page_callback,
-        issue_retrieved: issue_retrieved
-    )
-    subject.first_page_retrieved(:closed).call(http, query, 3)
+  it 'counts issues and reports pages in the repository' do
+    page_range = stub(:page_range, multiple_pages?: false)
+    counter.should_receive(:counted).with(:first, :open, page_range, issue_count)
+    subject.first_page_retrieved(:open).call(page_range, issue_count)
   end
 
-  it 'notifies the sychronizer when a page is imported' do
-    http = stub(:http, response_headers: :headers, response: :body)
-    query = { page: 2, state: 'closed' }
-    synchronizer.should_receive(:<<).with(page: 2, issues: 23)
-    subject.page_retrieved.call(http, query, 23)
-  end
-end
-
-describe Crafter::Gateway::Github::IssuesPager do
-  it 'returns 1...1 if there is only one page' do
-    headers = { 'NO LINK' => '' }
-    subject.page_range_from(headers).should eq 1...1
+  it 'imports the last page of issues' do
+    page_range = stub(:page_range, multiple_pages?: true, last: 4)
+    counter.should_receive(:counted).with(:first, :open, page_range, issue_count)
+    request_creator.should_receive(:for).with(page: 4, state: 'open')
+    subject.first_page_retrieved(:open).call(page_range, issue_count)
   end
 
-  it 'returns 2..last_page if there are pages remaning' do
-    headers = { 'LINK' => '<https://xxx.com?page=2&per_page=100>; rel="next", <https://xxx.com?page=5&per_page=100>; rel="last"' }
-    subject.page_range_from(headers).should eq 2..5
+  it 'counts issues and imports the remaining pages' do
+    page_range = stub(:page_range, middle: 2..3)
+    counter.should_receive(:counted).with(:last, :open, page_range, issue_count)
+    request_creator.should_receive(:for).with(page: 2, state: 'open')
+    request_creator.should_receive(:for).with(page: 3, state: 'open')
+    subject.last_page_retrieved(:open).call(page_range, issue_count)
   end
 end

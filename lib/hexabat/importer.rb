@@ -1,125 +1,45 @@
-require 'hexabat/page_request_creator'
-require 'hexabat/first_pages_importer'
-
 module Hexabat
   class Importer
-    attr_reader :repository
-
-    def initialize(repository)
-      @repository = repository
+    def initialize(issue_counter, request_creator)
+      @issue_counter = issue_counter
+      @request_creator = request_creator
     end
 
-   def import(callbacks)
-     first_page_importer(callbacks).import
-   end
+    def import
+      retrieve_first_page_of_issues :open
+      retrieve_first_page_of_issues :closed
+    end
 
-   private
-
-   def first_page_importer(callbacks)
-    FirstPagesImporter.new(
-       page_request_creator(callbacks),
-       &callbacks[:issue_count_known]
-     )
-   end
-
-   def page_request_creator(callbacks)
-     PageRequestCreator.new(@repository, &callbacks[:issue_retrieved])
-   end
-  end
-end
-
-__END__
-
-require_relative 'issue_page_importer'
-
-module Crafter
-  module Gateway
-    module Github
-
-      class Importer
-        def initialize repository, synchronizer, callbacks
-          @repository      = repository
-          @synchronizer    = synchronizer
-          @issue_retrieved = callbacks[:issue_retrieved]
-          @page_retrieved  = callbacks[:page_retrieved]
-        end
-
-        def import
-          import_open_issues
-          import_closed_issues
-        end
-
-        def first_page_retrieved state
-          ->(http, query, issue_count) do
-            page_retrieved.call http, query, issue_count
-            retrieve_remaining_pages state, http, query
-          end
-        end
-
-        def page_retrieved
-          @wrapped_page_retrived_callback ||= ->(http, query, issue_count) do
-            @synchronizer << { page: query[:page], issues: issue_count }
-            @page_retrieved.call query[:page], issue_count
-          end
-        end
-
-        private
-
-        def import_open_issues
-          import_page 1, {state: 'open'}, first_page_retrieved(:open)
-        end
-
-        def import_closed_issues
-          import_page 1, {state: 'closed'}, first_page_retrieved(:closed)
-        end
-
-        def import_page page_number, query, page_retrieved
-          query.merge! repository: @repository, page: page_number
-          query.merge! page_retrieved: page_retrieved
-          query.merge! issue_retrieved: @issue_retrieved
-          IssuePageImporter.import query
-        end
-
-        def retrieve_remaining_pages state, http, query
-          retrieve_pages remaining_pages(state, http), query
-        end
-
-        def remaining_pages state, http
-          IssuesPager::page_range_from(http.response_header).tap do |page_range|
-            @synchronizer.pages_of_issues_in_state state => page_range.last
-          end
-        end
-
-        def retrieve_pages page_range, query
-          query.delete(:page)
-          page_range.each { |page| import_page page, query, page_retrieved }
-        end
+    def first_page_retrieved(state)
+      ->(page_range, issue_count) do
+        notify_counted_page :first, state, page_range, issue_count
+        retrieve_last_page_of_issues state, page_range.last if page_range.multiple_pages?
       end
+    end
 
-      module IssuesPager
-        ONE_PAGE_RANGE = 1...1
-
-        def self.page_range_from headers
-          return ONE_PAGE_RANGE unless headers.has_key? 'LINK'
-          return extract_page_range_from headers['LINK']
-        end
-
-        def self.extract_page_range_from link_header
-          match = link_header.scan(/\?page=(?'page_number'\d+)/)
-          next_page = match[0][0].to_i
-          last_page = match[1][0].to_i
-          next_page..last_page
-        end
+    def last_page_retrieved(state)
+      ->(page_range, issue_count) do
+        notify_counted_page :last, state, page_range, issue_count
+        retrieve_pages_of_issues state, page_range.middle
       end
+    end
 
+    private
+
+    def retrieve_first_page_of_issues(state)
+      @request_creator.for page: 1, state: state.to_s, &first_page_retrieved(state)
+    end
+
+    def retrieve_last_page_of_issues(state, page)
+      @request_creator.for page: page, state: state.to_s, &last_page_retrieved(state)
+    end
+
+    def retrieve_pages_of_issues(state, pages)
+      pages.each { |page| @request_creator.for page: page, state: state.to_s }
+    end
+
+    def notify_counted_page(first_or_last, state, page_range, issue_count)
+      @issue_counter.counted first_or_last, state, page_range, issue_count
     end
   end
-end
-
-__END__
-
-EM.run do
-  Crafter::Gateway::Github::Importer.new('textmate/textmate') do |issue|
-    STDERR.puts "ISSUE #{issue['number']} imported"
-  end.import
 end
