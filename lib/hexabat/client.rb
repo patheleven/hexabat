@@ -1,13 +1,15 @@
-$: << File.join(File.dirname(__FILE__), '..', '..', 'lib')
 require 'eventmachine'
+
 require_relative 'importer'
+require_relative 'issue_count'
+require_relative 'request_creator'
 
 module Hexabat
   class Client
     attr_reader :callbacks
 
-    def initialize(importer)
-      @importer = importer
+    def initialize(repository)
+      @repository = repository
       @callbacks = {
         issue_retrieved:   ->(issue){},
         issue_count_known: ->(issue_count){}
@@ -35,7 +37,10 @@ module Hexabat
     private
 
     def start_importing
-      @importer.import(callbacks)
+      Importer.new(
+        IssueCount.new(&callbacks[:issue_count_known]),
+        RequestCreator.new(@repository, &callbacks[:issue_retrieved])
+      ).import
     end
 
     def known? event

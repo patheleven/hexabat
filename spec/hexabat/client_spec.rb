@@ -1,8 +1,8 @@
 require 'hexabat/client'
 
 describe Hexabat::Client do
-  subject          { described_class.new(importer) }
-  let(:importer)   { mock :importer }
+  subject          { described_class.new(repository) }
+  let(:repository) { 'path11/hexabat' }
   let(:a_callback) { lambda {} }
 
   it 'can be set with the issue retrieved callback' do
@@ -34,9 +34,10 @@ describe Hexabat::Client do
   end
 
   it 'imports all the issues from the repository' do
+    importer = mock(:importer)
     EM.stub(:run).and_yield
-    importer.should_receive(:import).
-      with(issue_retrieved: :callback1, issue_count_known: :callback2)
+    Hexabat::Importer.stub(:new).and_return(importer)
+    importer.should_receive(:import)
     subject.on issue_retrieved: :callback1
     subject.on issue_count_known: :callback2
     subject.import
