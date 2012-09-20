@@ -19,9 +19,18 @@ describe Hexabat::IssueCount do
   it 'can be notified with issue counts and page ranges' do
     page_range = stub(:page_range, multiple_pages?: true)
     subject.counted :first, :open, page_range, 10
-    subject.page_ranges.should  eq Hash[open: page_range, closed: nil]
+    subject.page_ranges.should eq Hash[open: page_range, closed: nil]
     expected_count = {open: {first: 10, last: nil}, closed: {first: nil, last: nil}}
     subject.issue_counts.should eq expected_count
+  end
+
+  it 'only registers first page page-ranges' do
+    page_range = stub(:page_range, multiple_pages?: false)
+    other_page_range = stub(:other_page_range, multiple_pages?: false)
+    subject.counted :first, :open, page_range, 1
+    subject.page_ranges.should eq Hash[open: page_range, closed: nil]
+    subject.counted :last, :open, other_page_range, 10
+    subject.page_ranges.should eq Hash[open: page_range, closed: nil]
   end
 
   it 'updates issue counts if there is only one page' do

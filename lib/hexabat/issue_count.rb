@@ -12,7 +12,7 @@ module Hexabat
 
     def counted(page, state, page_range, issue_count)
       check_done_counting do
-        @page_ranges[state] = page_range
+        @page_ranges[state] = page_range if page == :first
         @issue_counts[state][page] = issue_count
         @issue_counts[state][:last] = 0 unless page_range.multiple_pages?
       end
