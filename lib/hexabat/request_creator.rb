@@ -30,7 +30,7 @@ module Hexabat
 
     def error_occurred
       ->(http) do
-        STDERR.puts "HEXABAT: Error retreiving page #{@query[:page]}"
+        STDERR.puts "HEXABAT: Error retreiving page"
         STDERR.puts "HEXABAT: Status was #{http.response_header.status}"
         STDERR.puts "HEXABAT: Body was:\n===\n#{http.response}\n==="
       end
