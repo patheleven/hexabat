@@ -24,15 +24,6 @@ describe Hexabat::IssueCount do
     subject.issue_counts.should eq expected_count
   end
 
-  it 'only registers first page page-ranges' do
-    page_range = stub(:page_range, multiple_pages?: false)
-    other_page_range = stub(:other_page_range, multiple_pages?: false)
-    subject.counted :first, :open, page_range, 1
-    subject.page_ranges.should eq Hash[open: page_range, closed: nil]
-    subject.counted :last, :open, other_page_range, 10
-    subject.page_ranges.should eq Hash[open: page_range, closed: nil]
-  end
-
   it 'updates issue counts if there is only one page' do
     page_range = stub(:page_range, multiple_pages?: false, middle_page_count: 0)
     subject.counted :first, :open, page_range, 2
