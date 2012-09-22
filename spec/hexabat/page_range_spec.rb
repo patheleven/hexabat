@@ -16,6 +16,18 @@ describe Hexabat::PageRange do
   end
 end
 
+describe Hexabat::PageRange::LinkHeader do
+  it 'extracts the last page from the LINK header' do
+    headers = { 'LINK' => '<https://xxx.com?page=2&per_page=100>; rel="next", <https://xxx.com?page=8&per_page=100>; rel="last"' }
+    described_class.new(headers['LINK']).last.should be 8
+  end
+
+  it 'calculates the last page from the LINK header' do
+    headers = { 'LINK' => '<https://xxx.com?page=1&per_page=100&state=closed>; rel="last", <https://xxx.com?page=1&per_page=100&state=closed>; rel="first", <https://xxx.com?page=73&per_page=100&state=closed>; rel="prev"' }
+    described_class.new(headers['LINK']).last.should be 74
+  end
+end
+
 describe Hexabat::MultiplePageRange do
 
   it 'knows the first page' do
@@ -32,12 +44,12 @@ describe Hexabat::MultiplePageRange do
   end
 
   it 'knows the middle pages' do
-   described_class.new(1, 2).middle.should eq 2..2
-   described_class.new(1, 9).middle.should eq 2..8
+    described_class.new(1, 2).middle.should eq 0...0
+    described_class.new(1, 9).middle.should eq 2..8
   end
 
   it 'knows the middle pages count' do
-    described_class.new(1, 2).middle_page_count.should eq 1
+    described_class.new(1, 2).middle_page_count.should eq 0
     described_class.new(1, 9).middle_page_count.should eq 7
   end
 
@@ -64,7 +76,35 @@ describe Hexabat::SinglePageRange do
   end
 
   it 'knows the middle pages' do
-    subject.middle.should eq 2...2
+    subject.middle.should eq 0...0
+  end
+
+  it 'knows the middle pages count' do
+    subject.middle_page_count.should eq 0
+  end
+
+  it 'knows if it has more than one page' do
+    subject.multiple_pages?.should be_false
+  end
+end
+
+describe Hexabat::EmptyPageRange do
+  subject    { described_class.new }
+
+  it 'knows the first page' do
+   subject.first.should be 0
+  end
+
+  it 'knows the page count' do
+    subject.page_count.should be 0
+  end
+
+  it 'knows the last page' do
+    subject.last.should be 0
+  end
+
+  it 'knows the middle pages' do
+    subject.middle.should eq 0...0
   end
 
   it 'knows the middle pages count' do
