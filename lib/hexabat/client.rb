@@ -54,14 +54,3 @@ module Hexabat
 
   end
 end
-
-
-@issues = []
-EM.run do
-  Hexabat::Client.new('rails/rails').tap do |hexabat|
-    hexabat.on issue_retrieved: ->(issue){ @issues << issue; EM.stop if @issues.count == @count }
-    hexabat.on issue_count_known: ->(count){ @count = count; STDERR.puts "COUNT: #{count}" }
-    hexabat.import
-  end
-  EM.add_periodic_timer(3) { STDERR.puts "#{@issues.count} so far" }
-end
