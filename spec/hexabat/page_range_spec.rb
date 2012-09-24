@@ -18,18 +18,22 @@ end
 
 describe Hexabat::PageRange::LinkHeader do
   it 'extracts the last page from the LINK header' do
-    headers = { 'LINK' => '<https://xxx.com?page=2&per_page=100>; rel="next", <https://xxx.com?page=8&per_page=100>; rel="last"' }
-    described_class.new(headers['LINK']).last.should be 8
+    link = '<https://xxx.com?page=2&per_page=100>; rel="next", <https://xxx.com?page=8&per_page=100>; rel="last"'
+    described_class.new(link).last.should be 8
   end
 
-  it 'calculates the last page from the LINK header' do
-    headers = { 'LINK' => '<https://xxx.com?page=1&per_page=100&state=closed>; rel="last", <https://xxx.com?page=1&per_page=100&state=closed>; rel="first", <https://xxx.com?page=73&per_page=100&state=closed>; rel="prev"' }
-    described_class.new(headers['LINK']).last.should be 74
+  it 'calculates the last page from the LINK header when last is present' do
+    link = '<https://xxx.com?page=1&per_page=100&state=closed>; rel="last", <https://xxx.com?page=1&per_page=100&state=closed>; rel="first", <https://xxx.com?page=73&per_page=100&state=closed>; rel="prev"'
+    described_class.new(link).last.should be 74
+  end
+
+  it 'calculates the last page from the LINK header when last is missing' do
+    link = '<https://xxx.com?page=1&per_page=100&state=closed>; rel="first", <https://xxx.com?page=73&per_page=100&state=closed>; rel="prev"'
+    described_class.new(link).last.should be 74
   end
 end
 
 describe Hexabat::MultiplePageRange do
-
   it 'knows the first page' do
    described_class.new(3, 5).first.should be 3
   end

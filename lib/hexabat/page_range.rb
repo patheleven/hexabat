@@ -8,7 +8,7 @@ module Hexabat
     end
 
     class LinkHeader
-      PRED = /<https:\/\/\S+\?page=(?'prev_page'\d+)[\S]+>; rel="prev"/
+      PREV = /<https:\/\/\S+\?page=(?'prev_page'\d+)[\S]+>; rel="prev"/
       LAST = /<https:\/\/\S+\?page=(?'last_page'\d+)[\S]+>; rel="last"/
 
       def initialize(header)
@@ -16,24 +16,12 @@ module Hexabat
       end
 
       def last
-        # This calculation of the last page is needed because some times Github
-        # returns a LINK header with a wrong last page.
-        #
-        # This happens when you request the last page of a repository. When you
-        # do that the LINK header returns a link to the first page as the last
-        # page.
-        #
-        # See: https://gist.github.com/3754973
-        #
-        # To handle that we check the link to the previous page (prev).
-        # Given there is no way that a page number can be bigger than the
-        # last page's number. We use the prev page to calculate the last page.
-        return prev.succ if not prev.nil? and header_last < prev
+        return prev.succ if last_missing? or last_incorrect?
         return header_last
       end
 
       def prev
-        @prev ||= extract(PRED)
+        @prev ||= extract(PREV)
       end
 
       private
@@ -44,6 +32,22 @@ module Hexabat
 
       def extract(page_regexp)
         @header.scan(page_regexp).flatten.map(&:to_i).first
+      end
+
+      def last_missing?
+        header_last.nil?
+      end
+
+      def last_incorrect?
+        # This check of the last page is needed because some times Github
+        # returns a LINK header with a wrong last page.
+        #
+        # This happens when you request the last page of a repository. When you
+        # do that the LINK header returns a link to the first page as the last
+        # page.
+        #
+        # See: https://gist.github.com/3754973
+        not prev.nil? and header_last < prev
       end
     end
   end
