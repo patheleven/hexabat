@@ -60,4 +60,5 @@ end
 
 Then /^the callback is called with the number of issues of the repository$/ do
   @issue_count.should eq 401
+  @retrieved_issue_count.should eq @issue_count
 end
