@@ -1,7 +1,7 @@
 Hexabat
 =======
 
-**Hexabat is a github issues importer tool for Ruby.**
+**Hexabat is a Github issues importer tool for Ruby.**
 
 
 ## Installation
@@ -22,7 +22,7 @@ Or install it yourself as:
 ## Overview
 
 The
-[github issues API](http://developer.github.com/v3/issues/#list-issues-for-a-repository)
+[Github issues API](http://developer.github.com/v3/issues/#list-issues-for-a-repository)
 is nice, but if you try to get all the issues of a project you will have a hard
 time. You will need to query page by page and get open and closed issues
 separately.
@@ -46,8 +46,8 @@ Hexabat.import 'rails/rails'
 
 That means that Hexabat will allow you to:
 
-* Find out the total number of issues (both open and closed) of the repository.
-* Do some work with every issue in the repository (i.e. store it in a database).
+* **Find out the total number of issues** (both open and closed) of the repository.
+* **Do something with the data of every issue in the repository** (i.e. store it in a database).
 
 You don't need to do both things if you don't want to. You can setup only one 
 callback if that's what you need.
@@ -68,7 +68,7 @@ EM.run do
 end
 ```
 
-If an event loop is not already running Hexabat will start one for you.
+Hexabat will start the event loop for you if you call it outside a running one.
 
 
 ### Does Hexabat stop the event loop?
@@ -78,4 +78,5 @@ with each of the issues it doesn't know when it's work will be done. For
 example: if you use
 [em-mongo](https://github.com/bcg/em-mongo)
 to store each issue Hexabat can't know when each of those callbacks is done.
-**It's your job to** sync them up and **stop the event loop*.
+
+**It's your job to** sync them up and **stop the event loop**.
