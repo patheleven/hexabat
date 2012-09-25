@@ -4,8 +4,8 @@ require File.expand_path('../lib/hexabat/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = %w{path11}
   gem.email         = %w{alberto@path11.com ecomba@path11.com javier@path11.com sebastian@path11.com}
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = %q{A Github issues importing tool}
+  gem.summary       = %q{Importing all the issues of a Github repository is a complex task: the Github API does not provide an easy way of doing it. Hexabat will help you with that. It will allow you to find out the total number of issues (counting both open and closed ones) and to perform an action with each one of them.}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\)
