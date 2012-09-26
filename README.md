@@ -80,3 +80,14 @@ example: if you use
 to store each issue Hexabat can't know when each of those callbacks is done.
 
 **It's your job to** sync them up and **stop the event loop**.
+
+
+## What's next?
+
+There are a few tweaks and improvements that we want to add to Hexabat:
+
+* Being able to provide an OAuth token so you can import private repositories.
+* Handle repositories that don't exist or are private (aka 404 pages).
+* Handle forked repositories (forked repos can't have issues).
+
+After that we have a few more things planned but that will be a surprise.
