@@ -52,4 +52,10 @@ describe Hexabat::RequestCreator do
     http.stub(:response).and_return('{"message":"Issues are disabled for this repo"}')
     expect { subject.page_retrieved.call(http) }.to raise_error Hexabat::ImportError
   end
+
+  it 'raises an exception if the repository is a missing' do
+    headers.stub(:status).and_return(404)
+    http.stub(:response).and_return('{"message":"Not Found"}')
+    expect { subject.page_retrieved.call(http) }.to raise_error Hexabat::ImportError
+  end
 end
