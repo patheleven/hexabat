@@ -4,6 +4,8 @@ require 'yajl'
 require_relative 'page_range'
 
 module Hexabat
+  class ImportError < Exception; end
+
   class RequestCreator
     MAX_PAGE_SIZE = 100
 
@@ -21,10 +23,8 @@ module Hexabat
 
     def page_retrieved(page_callback = nil)
       ->(http) do
-        parse_issues_from http.response do |issues|
-          page_callback.call(PageRange.from(http.response_header), issues.count) unless page_callback.nil?
-          notify_issue_retrieved issues
-        end
+        check_for_errors(http)
+        process_response(http, page_callback)
       end
     end
 
@@ -48,6 +48,19 @@ module Hexabat
 
     def query_from(params)
       params.merge per_page: MAX_PAGE_SIZE
+    end
+
+    def check_for_errors(http)
+      if http.response_header.status > 200
+        raise ImportError, Yajl::Parser.parse(http.response).fetch('message')
+      end
+    end
+
+    def process_response(http, page_callback)
+      parse_issues_from http.response do |issues|
+        page_callback.call(PageRange.from(http.response_header), issues.count) unless page_callback.nil?
+        notify_issue_retrieved issues
+      end
     end
 
     def parse_issues_from(json)
