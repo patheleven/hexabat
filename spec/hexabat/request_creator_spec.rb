@@ -24,11 +24,6 @@ describe Hexabat::RequestCreator do
     subject.for(page: 1, state: 'open')
   end
 
-  it 'setups the errback for the request' do
-    get.should_receive(:errback)
-    subject.for(page: 1, state: 'open')
-  end
-
   it 'yields every issue in the page to the callback' do
     EM.stub(:next_tick).and_yield
     Yajl::Parser.stub(:parse).with(:json).and_return([:issue1, :issue2])

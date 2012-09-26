@@ -17,7 +17,6 @@ module Hexabat
     def for(params, &callback)
       build_request(params).tap do |request|
         request.callback &page_retrieved(callback)
-        request.errback  &error_occurred
       end
     end
 
@@ -25,14 +24,6 @@ module Hexabat
       ->(http) do
         check_for_errors(http)
         process_response(http, page_callback)
-      end
-    end
-
-    def error_occurred
-      ->(http) do
-        STDERR.puts "HEXABAT: Error retreiving page"
-        STDERR.puts "HEXABAT: Status was #{http.response_header.status}"
-        STDERR.puts "HEXABAT: Body was:\n===\n#{http.response}\n==="
       end
     end
 
@@ -52,7 +43,7 @@ module Hexabat
 
     def check_for_errors(http)
       if http.response_header.status > 200
-        raise ImportError, Yajl::Parser.parse(http.response).fetch('message')
+        raise ImportError, "#{@repository} #{Yajl::Parser.parse(http.response).fetch('message')}"
       end
     end
 
