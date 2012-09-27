@@ -58,8 +58,6 @@ If you want to import issues on behalf of a user you authenticated with OAuth
 you can use her token in order to do it:
 
 ```ruby
-#... callback setup
-
 Hexabat.import 'rails/rails', token: auth_token
 ```
 
