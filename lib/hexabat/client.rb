@@ -8,8 +8,9 @@ module Hexabat
   class Client
     attr_reader :callbacks
 
-    def initialize(repository)
+    def initialize(repository, params = {})
       @repository = repository
+      @token = params[:token]
       @callbacks = {
         issue_retrieved:   ->(issue){},
         issue_count_known: ->(issue_count){}
@@ -37,10 +38,19 @@ module Hexabat
     private
 
     def start_importing
-      Importer.new(
-        IssueCount.new(&callbacks[:issue_count_known]),
+      Importer.new(issue_count, request_creator).import
+    end
+
+    def request_creator
+      if @token.nil?
         RequestCreator.new(@repository, &callbacks[:issue_retrieved])
-      ).import
+      else
+        TokenAuthorizedRequestCreator.new(@repository, @token, &callbacks[:issue_retrieved])
+      end
+    end
+
+    def issue_count
+      IssueCount.new(&callbacks[:issue_count_known])
     end
 
     def known? event

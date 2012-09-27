@@ -41,6 +41,7 @@ module Hexabat
       params.merge per_page: MAX_PAGE_SIZE
     end
 
+
     def check_for_errors(http)
       if http.response_header.status > 200
         raise ImportError, "#{@repository} #{Yajl::Parser.parse(http.response).fetch('message')}"
@@ -65,4 +66,20 @@ module Hexabat
     end
   end
 
+  class TokenAuthorizedRequestCreator < RequestCreator
+    def initialize(repository, token, &issue_retrieved)
+     @token = token
+     super(repository, &issue_retrieved)
+    end
+
+    private
+
+    def build_request(params)
+      EM::HttpRequest.new(endpoint).get query: query_from(params), head: headers
+    end
+
+    def headers
+      { 'Authorization' => "token #{@token}" }
+    end
+  end
 end

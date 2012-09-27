@@ -11,7 +11,7 @@ describe Hexabat do
 
   it 'imports the repository'  do
     client = mock
-    Hexabat::Client.stub(:new).with('path11/hexabat').and_return(client)
+    Hexabat::Client.stub(:new).with('path11/hexabat', {}).and_return(client)
     client.should_receive(:on).with(issue_retrieved: issue_retrieved)
     client.should_receive(:on).with(issue_count_known: issue_count_known)
     client.should_receive(:import)

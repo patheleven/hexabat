@@ -3,8 +3,8 @@ require 'hexabat/importer'
 require 'hexabat/version'
 
 module Hexabat
-  def self.import(repository)
-    Client.new(repository).tap do |hexabat|
+  def self.import(repository, params = {})
+    Client.new(repository, params).tap do |hexabat|
       hexabat.on issue_retrieved:   @issue_retrieved
       hexabat.on issue_count_known: @issue_count_known
       hexabat.import
