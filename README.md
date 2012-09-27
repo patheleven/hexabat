@@ -52,6 +52,17 @@ That means that Hexabat will allow you to:
 You don't need to do both things if you don't want to. You can setup only one 
 callback if that's what you need.
 
+###Authentication
+
+If you want to import issues on behalf of a user you authenticated with OAuth 
+you can use her token in order to do it:
+
+```ruby
+#... callback setup
+
+Hexabat.import 'rails/rails', token: auth_token
+```
+
 
 ## EventMachine integration
 
@@ -86,8 +97,7 @@ to store each issue Hexabat can't know when each of those callbacks is done.
 
 There are a few tweaks and improvements that we want to add to Hexabat:
 
-* Being able to provide an OAuth token so you can import private repositories.
-* Handle repositories that don't exist or are private (aka 404 pages).
-* Handle forked repositories (forked repos can't have issues).
+* Being able to provide an OAuth tokens, and keys so you can authorize your 
+application without the need of a user OAuth token.
 
 After that we have a few more things planned but that will be a surprise.
