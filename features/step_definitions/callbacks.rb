@@ -49,7 +49,7 @@ When /^I import the "(.*?)" repository$/ do |repository|
   @hexabat.on issue_retrieved:   @issue_retrieved   if @issue_retrieved
   @hexabat.on issue_count_known: @issue_count_known if @issue_count_known
   EM.run do
-    EM.add_timer(0.1){ EM.stop }
+    EM.add_timer(0.15){ EM.stop }
     @hexabat.import
   end
 end
