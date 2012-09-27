@@ -4,8 +4,9 @@ describe 'Issue page requests' do
   let(:repository) { 'path11/hexabat' }
   let(:callback)   { lambda{} }
 
-  let(:http)     { stub(:http, response: :json, response_header: headers) }
+  let(:http)     { stub(:http, response: issues, response_header: headers) }
   let(:get)      { stub(:get).as_null_object }
+  let(:issues)   { [:issue1, :issue2] }
   let(:headers)  { stub(:headers, status: 200) }
   let(:endpoint) { 'https://api.github.com/repos/path11/hexabat/issues' }
 
@@ -23,7 +24,6 @@ describe 'Issue page requests' do
 
     it 'yields every issue in the page to the callback' do
       EM.stub(:next_tick).and_yield
-      Yajl::Parser.stub(:parse).with(:json).and_return([:issue1, :issue2])
       callback.should_receive(:call).with(:issue1)
       callback.should_receive(:call).with(:issue2)
       subject.page_retrieved.call(http)
@@ -32,8 +32,6 @@ describe 'Issue page requests' do
     it 'can be set with a callback for when the whole page is retrieved' do
       page_range = stub(:page_range)
       Hexabat::PageRange.stub(:from).with(headers).and_return(page_range)
-      issues = [:issue1, :issue2]
-      Yajl::Parser.stub(:parse).with(:json).and_return(issues)
       page_callback = mock(:page_callback)
       page_callback.should_receive(:call).with(page_range, issues.count)
       subject.page_retrieved(page_callback).call(http)

@@ -1,5 +1,7 @@
 require 'em-http-request'
-require 'yajl'
+require 'em-http/middleware/json_response'
+
+
 
 require_relative 'page_range'
 
@@ -12,6 +14,7 @@ module Hexabat
     def initialize(repository, &issue_retrieved)
       @repository = repository
       @callback = issue_retrieved
+      EM::HttpRequest.use(EM::Middleware::JSONResponse)
     end
 
     def for(params, &callback)
@@ -23,7 +26,7 @@ module Hexabat
     def page_retrieved(page_callback = nil)
       ->(http) do
         check_for_errors(http)
-        process_response(http, page_callback)
+        process_response(http.response_header, http.response, page_callback)
       end
     end
 
@@ -41,22 +44,15 @@ module Hexabat
       params.merge per_page: MAX_PAGE_SIZE
     end
 
-
     def check_for_errors(http)
       if http.response_header.status > 200
-        raise ImportError, "#{@repository} #{Yajl::Parser.parse(http.response).fetch('message')}"
+        raise ImportError, "#{@repository} #{http.response['message']}"
       end
     end
 
-    def process_response(http, page_callback)
-      parse_issues_from http.response do |issues|
-        page_callback.call(PageRange.from(http.response_header), issues.count) unless page_callback.nil?
-        notify_issue_retrieved issues
-      end
-    end
-
-    def parse_issues_from(json)
-      yield Yajl::Parser.parse(json)
+    def process_response(headers, issues, page_callback)
+      page_callback.call(PageRange.from(headers), issues.count) unless page_callback.nil?
+      notify_issue_retrieved issues
     end
 
     def notify_issue_retrieved(issues)
