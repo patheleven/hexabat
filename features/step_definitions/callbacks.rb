@@ -33,24 +33,17 @@ Given /^there are 101 open issues and 300 closed issues on "(.*?)"$/ do |reposit
 end
 
 When /^I set up an issue retrieved callback$/ do
-  @retrieved_issues = []
-  @issue_retrieved = ->(issue) { @retrieved_issues << issue }
+  setup_callbacks
 end
 
 When /^I setup the issue count known callback$/ do
-  @retrieved_issue_count = 0
-  @issue_retrieved = ->(issue) { @retrieved_issue_count += 1 }
-  @issue_count = 0
-  @issue_count_known = ->(issue_count) { @issue_count = issue_count }
+  setup_callbacks
 end
 
 When /^I import the "(.*?)" repository$/ do |repository|
-  @hexabat = Hexabat::Client.new(repository)
-  @hexabat.on issue_retrieved:   @issue_retrieved   if @issue_retrieved
-  @hexabat.on issue_count_known: @issue_count_known if @issue_count_known
   EM.run do
-    EM.add_timer(0.15){ EM.stop }
-    @hexabat.import
+    EM.add_timer(TIMEOUT){ EM.stop }
+    Hexabat.import repository
   end
 end
 
@@ -60,5 +53,5 @@ end
 
 Then /^the callback is called with the number of issues of the repository$/ do
   @issue_count.should eq 401
-  @retrieved_issue_count.should eq @issue_count
+  @retrieved_issues.count.should eq @issue_count
 end
