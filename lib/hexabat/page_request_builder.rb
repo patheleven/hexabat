@@ -3,9 +3,8 @@ require 'em-http/middleware/json_response'
 require 'hexabat/page_range'
 
 module Hexabat
-  class ImportError < Exception; end
-
   module PageRequestBuilder
+
     def self.for(repository, response_processor, params = {})
       if params.has_key? :token
         TokenAuthorized.new(repository, params[:token], response_processor)
