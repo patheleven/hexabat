@@ -56,6 +56,10 @@ That means that Hexabat will allow you to:
 
 * **Find out the total number of issues** (both open and closed) of the repository.
 * **Do something with the data of every issue in the repository** (i.e. store it in a database).
+  You can check the JSON returned by github on the
+  [github api documentation](http://developer.github.com/v3/issues/#list-issues-for-a-repository).
+  The only thing Hexabat does is parsing this JSON and yield the issues to the
+  callback one by one.
 * **Handle importing errors properly** (i.e. store the error reason in a database)
 
 You don't need set every single callback if you don't want to. You can setup only one
