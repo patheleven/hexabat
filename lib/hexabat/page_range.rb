@@ -112,11 +112,11 @@ module Hexabat
     end
 
     def middle
-      first...last
+      EmptyPageRange.new
     end
 
     def middle_page_count
-      0
+      middle.page_count
     end
 
     def multiple_pages?
