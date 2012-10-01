@@ -37,8 +37,18 @@ Hexabat tackles those two problems by providing  an easy way of importing
 the issues of a Github repository:
 
 ```ruby
-Hexabat.on_issue_retrieved   { |issue| puts "issue ##{issue['number']} imported" }
-Hexabat.on_issue_count_known { |count| puts "The repository has #{count} issues" }
+Hexabat.on_issue_retrieved do |issue|
+  puts "issue ##{issue['number']} imported"
+end
+
+Hexabat.on_issue_count_known do |count|
+  puts "The repository has #{count} issues"
+end
+
+Hexabat.on_error do |repo, status, message|
+  STDERR.puts "Failed to import #{repo} due to #{status}: #{message}"
+end
+
 Hexabat.import 'rails/rails'
 ```
 
@@ -46,17 +56,27 @@ That means that Hexabat will allow you to:
 
 * **Find out the total number of issues** (both open and closed) of the repository.
 * **Do something with the data of every issue in the repository** (i.e. store it in a database).
+* **Handle importing errors properly** (i.e. store the error reason in a database)
 
-You don't need to do both things if you don't want to. You can setup only one 
-callback if that's what you need.
+You don't need set every single callback if you don't want to. You can setup only one
+callback if that's what you need. We also provide a default `errback` that will
+print to `STDERR` a message with the failure (pretty similar to the example above).
+
+
 
 ###Authentication
 
-If you want to import issues on behalf of a user you authenticated with OAuth 
+If you are importing a public repository's issues you don't need to authenticate:
+
+```ruby
+Hexabat.import 'rails/rails'
+```
+
+If you want to import issues on behalf of a user you authenticated with OAuth
 you can use her token in order to do it:
 
 ```ruby
-Hexabat.import 'rails/rails', token: auth_token
+Hexabat.import 'path11/private_repo', token: auth_token
 ```
 
 
@@ -93,7 +113,7 @@ to store each issue Hexabat can't know when each of those callbacks is done.
 
 There are a few tweaks and improvements that we want to add to Hexabat:
 
-* Being able to provide an OAuth tokens, and keys so you can authorize your 
+* Being able to provide an OAuth tokens, and keys so you can authorize your
 application without the need of a user OAuth token.
 
 After that we have a few more things planned but that will be a surprise.
