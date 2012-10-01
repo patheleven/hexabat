@@ -2,15 +2,16 @@ require 'eventmachine'
 
 require_relative 'importer'
 require_relative 'issue_count'
-require_relative 'request_creator'
+require_relative 'page_request_builder'
+require_relative 'page_response_processor'
 
 module Hexabat
   class Client
-    attr_reader :callbacks
+    attr_reader :repository, :params, :callbacks
 
     def initialize(repository, params = {})
       @repository = repository
-      @token = params[:token]
+      @params = params
       @callbacks = {
         issue_retrieved:   ->(issue){},
         issue_count_known: ->(issue_count){}
@@ -28,11 +29,11 @@ module Hexabat
     def on(event_callback)
       event = event_callback.keys.first
       raise_unknown_event_error event unless known? event
-      @callbacks.merge! event_callback
+      callbacks.merge! event_callback
     end
 
     def known_events
-      @callbacks.keys
+      callbacks.keys
     end
 
     private
@@ -42,15 +43,15 @@ module Hexabat
     end
 
     def request_creator
-      if @token.nil?
-        RequestCreator.new(@repository, &callbacks[:issue_retrieved])
-      else
-        TokenAuthorizedRequestCreator.new(@repository, @token, &callbacks[:issue_retrieved])
-      end
+      PageRequestBuilder.for repository, response_processor, params
     end
 
     def issue_count
       IssueCount.new(&callbacks[:issue_count_known])
+    end
+
+    def response_processor
+      PageResponseProcessor.new repository, callbacks[:issue_retrieved]
     end
 
     def known? event
