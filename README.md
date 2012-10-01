@@ -1,4 +1,4 @@
-# Hexabat [![Build Status](https://secure.travis-ci.org/jacegu/hexabat.png?branch=master)](http://travis-ci.org/#!/jacegu/hexabat)  [![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/jacegu/hexabat)
+# Hexabat [![Build Status](https://secure.travis-ci.org/jacegu/hexabat.png?branch=master)](http://travis-ci.org/jacegu/hexabat)  [![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/jacegu/hexabat)
 
 **Hexabat is a Github issues importer tool for Ruby.**
 
