@@ -96,7 +96,6 @@ end
 
 Hexabat will start the event loop for you if you call it outside a running one.
 
-
 ### Does Hexabat stop the event loop?
 
 No it doesn't. Given that Hexabat doesn't know the work you are going to do
