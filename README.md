@@ -33,7 +33,7 @@ but, where are the closed ones?
 
 ## Features
 
-Hexabat tackles those two problems by providing  an easy way of importing
+Hexabat tackles those two problems by providing an easy way of importing
 the issues of a Github repository:
 
 ```ruby
@@ -61,7 +61,6 @@ That means that Hexabat will allow you to:
 You don't need set every single callback if you don't want to. You can setup only one
 callback if that's what you need. We also provide a default `errback` that will
 print to `STDERR` a message with the failure (pretty similar to the example above).
-
 
 
 ###Authentication
