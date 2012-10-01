@@ -2,12 +2,11 @@ require 'eventmachine'
 require 'hexabat/page_range'
 
 module Hexabat
-  class ImportError < Exception; end
-
   class PageResponseProcessor
-    def initialize(repository, issue_callback)
+    def initialize(repository, issue_callback, errback)
       @repository = repository
       @issue_callback = issue_callback
+      @errback = errback
     end
 
     def process(http, &page_callback)
@@ -18,7 +17,8 @@ module Hexabat
     private
 
     def check_for_errors(http)
-      raise ImportError, "#{@repository} #{http.response['message']}" if http.response_header.status > 200
+      status = http.response_header.status
+      @errback.call @repository, status, http.response['message'] if status > 200
     end
 
     def process_response(headers, issues, page_callback)

@@ -14,7 +14,8 @@ module Hexabat
       @params = params
       @callbacks = {
         issue_retrieved:   ->(issue){},
-        issue_count_known: ->(issue_count){}
+        issue_count_known: ->(issue_count){},
+        error: ->(repository, status, message) { STDERR.puts "#{repository} #{status} #{message}" }
       }
     end
 
@@ -51,7 +52,7 @@ module Hexabat
     end
 
     def response_processor
-      PageResponseProcessor.new repository, callbacks[:issue_retrieved]
+      PageResponseProcessor.new repository, callbacks[:issue_retrieved], callbacks[:error]
     end
 
     def known? event

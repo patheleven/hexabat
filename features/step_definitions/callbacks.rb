@@ -32,6 +32,13 @@ Given /^there are 101 open issues and 300 closed issues on "(.*?)"$/ do |reposit
     to_return(:status => 200, :body => CLOSED_ISSUES_PAGE_3, :headers => {'Link' => link})
 end
 
+Given /^the repository "(.*?)" doesn't exist$/ do |repository|
+  stub_request(:get, "https://api.github.com/repos/#{repository}/issues?page=1&per_page=100&state=closed").
+    to_return(:status => 404, :body => '{"message": "Not found"}', :headers => {})
+  stub_request(:get, "https://api.github.com/repos/#{repository}/issues?page=1&per_page=100&state=open").
+    to_return(:status => 404, :body => '{"message": "Not found"}', :headers => {})
+end
+
 When /^I set up an issue retrieved callback$/ do
   setup_callbacks
 end
@@ -47,6 +54,10 @@ When /^I import the "(.*?)" repository$/ do |repository|
   end
 end
 
+When /^I setup the errback$/ do
+  setup_errback
+end
+
 Then /^the callback is called with the issue in that repository$/ do
   @retrieved_issues.count.should be 1
 end
@@ -54,4 +65,10 @@ end
 Then /^the callback is called with the number of issues of the repository$/ do
   @issue_count.should eq 401
   @retrieved_issues.count.should eq @issue_count
+end
+
+Then /^the errback is called with the error message$/ do
+  @error_repository = 'path11/rails'
+  @error_status = '404'
+  @error_message = 'Not found'
 end

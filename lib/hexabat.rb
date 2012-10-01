@@ -7,6 +7,7 @@ module Hexabat
     Client.new(repository, params).tap do |hexabat|
       hexabat.on issue_retrieved:   @issue_retrieved
       hexabat.on issue_count_known: @issue_count_known
+      hexabat.on error:             @errback
       hexabat.import
     end
   end
@@ -17,5 +18,9 @@ module Hexabat
 
   def self.on_issue_count_known(&callback)
     @issue_count_known = callback
+  end
+
+  def self.on_error(&callback)
+    @errback = callback
   end
 end

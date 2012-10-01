@@ -13,3 +13,9 @@ Feature: Callbacks
      When I setup the issue count known callback
       And I import the "path11/hexabat" repository
      Then the callback is called with the number of issues of the repository
+
+  Scenario: The repository can't be imported and the errback is called.
+    Given the repository "path11/rails" doesn't exist
+     When I setup the errback
+      And I import the "path11/rails" repository
+     Then the errback is called with the error message

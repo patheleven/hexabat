@@ -11,6 +11,14 @@ module CallbackSetup
     setup_issue_retrieved
   end
 
+  def setup_errback
+    Hexabat.on_error do |repository, status, message|
+      @error_repository = repository
+      @error_status = status
+      @error_message = message
+    end
+  end
+
   def setup_issue_retrieved
     @retrieved_issues = []
     Hexabat.on_issue_retrieved do |issue|

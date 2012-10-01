@@ -1,9 +1,10 @@
 require 'hexabat/page_response_processor'
 
 describe Hexabat::PageResponseProcessor do
-  subject          { described_class.new repository, callback }
+  subject          { described_class.new repository, callback, errback }
   let(:repository) { 'path11/hexabat' }
   let(:callback)   { lambda{} }
+  let(:errback)    { lambda{} }
 
   let(:http)    { stub(:http, response: issues, response_header: headers) }
   let(:issues)  { [:issue1, :issue2] }
@@ -24,17 +25,18 @@ describe Hexabat::PageResponseProcessor do
     subject.process(http, &page_callback)
   end
 
-  it 'raises an exception if the repository is a fork' do
+  it 'calls the errback if the repository is a fork' do
     headers.stub(:status).and_return(410)
-    http.stub(:response).
-      and_return('{"message":"Issues are disabled for this repo"}')
-    expect { subject.process(http) }.to raise_error Hexabat::ImportError
+    http.stub(:response).and_return('message' => 'Issues are disabled for this repo')
+    errback.should_receive(:call).with(repository, 410, 'Issues are disabled for this repo')
+    subject.process(http)
   end
 
-  it 'raises an exception if the repository is a missing' do
+  it 'calls the errback if the repository is a missing' do
     headers.stub(:status).and_return(404)
-    http.stub(:response).and_return('{"message":"Not Found"}')
-    expect { subject.process(http) }.to raise_error Hexabat::ImportError
+    http.stub(:response).and_return('message' => 'Not Found')
+    errback.should_receive(:call).with(repository, 404, 'Not Found')
+    subject.process(http)
   end
 
 end
