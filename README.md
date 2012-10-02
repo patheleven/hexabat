@@ -26,7 +26,7 @@ time. You will need to query page by page and get open and closed issues
 separately.
 
 Also, if you want to find out the total number of issues, there is no easy way
-of doing it. You can't find out the amount of open issues through the
+of doing it. You can find out the amount of open issues through the
 [repositories API](http://developer.github.com/v3/repos/#get)
 but, where are the closed ones?
 
@@ -60,7 +60,7 @@ That means that Hexabat will allow you to:
   [github api documentation](http://developer.github.com/v3/issues/#list-issues-for-a-repository).
   The only thing Hexabat does is parsing this JSON and yield the issues to the
   callback one by one.
-* **Handle importing errors properly** (i.e. store the error reason in a database)
+* **Handle importing errors properly** (i.e. store the error reason in a database).
 
 You don't need set every single callback if you don't want to. You can setup only one
 callback if that's what you need. We also provide a default `errback` that will
