@@ -19,6 +19,12 @@ describe Hexabat::Client do
     expect { subject.on unknown_event: a_callback}.to raise_error ArgumentError
   end
 
+  it 'ignores attemts to set a callback to nil' do
+    subject.callbacks[:error].should_not be nil
+    subject.on error: nil
+    subject.callbacks[:error].should_not be nil
+  end
+
   it 'starts Event Machine if it is not running' do
     EM.stub(:reactor_running?).and_return(false)
     EM.should_receive(:run)

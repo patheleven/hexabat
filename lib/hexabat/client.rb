@@ -30,7 +30,7 @@ module Hexabat
     def on(event_callback)
       event = event_callback.keys.first
       raise_unknown_event_error event unless known? event
-      callbacks.merge! event_callback
+      callbacks.merge! event_callback unless event_callback[event].nil?
     end
 
     def known_events
