@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.email         = %w{alberto@path11.com ecomba@path11.com javier@path11.com sebastian@path11.com}
   gem.description   = %q{A Github issues importing tool}
   gem.summary       = %q{Importing all the issues of a Github repository is a complex task: the Github API does not provide an easy way of doing it. Hexabat will help you with that. It will allow you to find out the total number of issues (counting both open and closed ones) and to perform an action with each one of them.}
-  gem.homepage      = ""
+  gem.homepage      = "http://github.com/path11/hexabat"
 
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
@@ -23,4 +23,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec'
   gem.add_development_dependency 'webmock'
+  gem.add_development_dependency 'simplecov'
+  gem.add_development_dependency 'yard'
 end
